@@ -24,6 +24,20 @@ component displayname="Cold Jack" hint="A CF wrapper around the Java Jackcess Li
   *
   *                          {"ProductIdNumber":"ProductId"}
   *
+  *                          you can also do complex mappings where a single column in the source
+  *                          can be split into multiple columns in the destination.  The source
+  *                          column has to contain a delimiter and your mapping would define the
+  *                          source the various destinations and the delimiter like this:
+  *
+  *                          {"source":"destination1,destination2,destination3|delimiter"}
+  *
+  *                          ex: {"MediaItem":"ChapterId,SectionId|."}
+  *
+  *                          This would split the MediaItem in the source and treat it like a period
+  *                          delimited list.  The first item in the list would go into chapterId, the second
+  *                          item would go into sectionid. If there are more items in the list they would
+  *                          be lost.
+  *
   * @return query - a coldfusion query object that contains the data from the requested table
   * @output false
   */
@@ -46,12 +60,25 @@ component displayname="Cold Jack" hint="A CF wrapper around the Java Jackcess Li
           columnTypeList = "";
 
           for(col in accessColumns){
-            colName = col.getName();
+            columnName =col.getName();
+            colName = columnName;
             if(structKeyExists(colMap,colName)){
               colName = colMap[colName];
             }
-            columnList = ListAppend(columnList, colName);
-            columnTypeList = ListAppend(columnTypeList, getCfColumnType(col.getType()));
+            if( (colName NEQ columnName) AND ListLen(colName,"|") GT 1){ // splitting a source into multiple columns!
+
+
+              splitColumns = GetToken(colName,1, "|");
+
+              for(idx=1;idx LTE ListLen(splitColumns);idx=idx+1){
+                columnList = ListAppend(columnList, GetToken(splitColumns,idx,","));
+                columnTypeList = ListAppend(columnTypeList, getCfColumnType(col.getType()));
+              }
+
+            } else {
+              columnList = ListAppend(columnList, colName);
+              columnTypeList = ListAppend(columnTypeList, getCfColumnType(col.getType()));
+            }
           }
 
           finalQuery=QueryNew(columnList, columnTypeList);
@@ -68,9 +95,21 @@ component displayname="Cold Jack" hint="A CF wrapper around the Java Jackcess Li
               if(structKeyExists(colMap,colName)){
                 colName = colMap[colName];
               }
+              if(colName NEQ columnName AND ListLen(colName,"|") EQ 2){ // splitting a source into multiple columns!
+                splitColumns = GetToken(colName,1, "|");
+                delim = GetToken(colName,2,"|");
+                originalValue = row.get(columnName);
 
-              value = row.get(columnName);
-              querySetCell(finalQuery, colName, TRIM(row.get(columnName)));
+                for(idx=1;idx LTE ListLen(splitColumns);idx=idx+1){
+                  col = GetToken(splitColumns,idx,",");
+                  value = GetToken(originalValue, idx, delim);
+                  querySetCell(finalQuery, col, value);
+                }
+
+              } else {
+                value = row.get(columnName);
+                querySetCell(finalQuery, colName, TRIM(row.get(columnName)));
+              }
             }
           }
 

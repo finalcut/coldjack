@@ -40,7 +40,11 @@ component hint="runs some MXUnit Tests on the coldjack component" output="false"
   public void function testReadWithColumnMap(){
     coldjack = createObject("component", "coldjack");
     db = getDirectoryFromPath(getCurrentTemplatePath()) & "\test.accdb";
-    colMap = {"FirstName":"PersonName","Bio":"Biography"};
+
+    //notice the third item in this mapping is a complex mapping; meaning the ChapterSection
+    // column will be split into two columns Chapter and Section
+    // this means each ChapterSection in the access database will be in the format Chapter.Section
+    colMap = {"FirstName":"PersonName","Bio":"Biography","ChapterSection":"Chapter,Section|."};
 
     q = coldjack.readTable(db, "People",colMap);
 
@@ -52,6 +56,14 @@ component hint="runs some MXUnit Tests on the coldjack component" output="false"
     expectedBio = "<div>a long time ago in a galaxy far far away</div>";
 
     assertEquals(expectedBio,q.biography);
+
+    // special type of mapping where a column is split into multi columns on output:
+    assertEquals("10",q.chapter[1]);
+    assertEquals("24",q.section[1]);
+
+    assertEquals("2",q.chapter[2]);
+    assertEquals("9",q.section[2]);
+
   }
 
   public void function testBadDbPath(){
