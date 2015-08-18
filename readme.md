@@ -34,7 +34,7 @@ q = coldjack.readTable(db, "account");
 ```
 
 # Exception Handling
-There are a few exceptions that coldjack can throw and each has it's own custom type:
+I'm not really sure what the best practice is for defining custom exceptions in CF but I sort of name-spaced mine using the "type" attribute.  There are a few exceptions that coldjack can throw and each has it's own custom type:
 
 ### ColdJack-Missing DB File
 If you pass in an invalid path to the access database
