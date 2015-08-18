@@ -12,7 +12,7 @@ component displayname="Cold Jack" hint="A CF wrapper around the Java Jackcess Li
     return this;
   }
 
-  /*
+  /**
   * takes in three arguments:
   * @param dbPath required - the fully qualified path to the MS Access database file
   * @param tableName required - the case insensitive name of the table you want to read
@@ -23,6 +23,9 @@ component displayname="Cold Jack" hint="A CF wrapper around the Java Jackcess Li
   *                          you would pass in
   *
   *                          {"ProductIdNumber":"ProductId"}
+  *
+  * @return query - a coldfusion query object that contains the data from the requested table
+  * @output false
   */
   public query function readTable(required string dbPath, required string tableName, struct colMap={} ){
     var finalQuery = "";
