@@ -102,8 +102,10 @@ component displayname="Cold Jack" hint="A CF wrapper around the Java Jackcess Li
 
                 for(idx=1;idx LTE ListLen(splitColumns);idx=idx+1){
                   col = GetToken(splitColumns,idx,",");
-                  value = GetToken(originalValue, idx, delim);
-                  querySetCell(finalQuery, col, value);
+                  if(listLen(originalValue,delim) GTE idx){
+                    value = GetToken(originalValue, idx, delim);
+                    querySetCell(finalQuery, col, value);
+                  }
                 }
 
               } else {

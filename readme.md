@@ -99,6 +99,30 @@ However, with the `colMap` provided you would get this result:
 
 I personally find the `colMap` useful for scenarios where I am importing the access data into a different database and the access database that I was given to import has poor column names that don't really reflect the data very well.
 
+## Even More Advanced Usage of the ColMap
+
+While I have used the colmap feature described above I have actually needed it to do even more - I've needed to split source columns into multiple columns.  For instance, let's say you have a column in the source database with content that looks like this:
+
+| MediaItem |
+| --------- |
+| 10.2.3.1  |
+| 10.3.5.6  |
+| 11.0.1.24 |
+| 1.52.99.10 |
+
+The value there doesn't make a lot of sense initially but then you are told that it is broken down as `Chapter.Section.Regulation.ItemNumber` so you would like to split that column up into four distinct columns by splitting at the `.`.  Well, fortunately, the colmap feature can do that too.  
+
+```
+colMap = {"MediaItem":"Chapter,Section,Regulation,ItemNumber|."};
+coldjack = createObject("component", "coldjack");
+db = getDirectoryFromPath(getCurrentTemplatePath()) & "\my_acccess_db.accdb";
+q = coldjack.readTable(db, "product", colMap);
+```
+
+To use the advanced column mapping you just provide a comma delimited list of target columns followed by a pipe `|` and finally what character acts as the delimiter in the source file.
+
+**NOTE**: If your source column has too few elements in it then each extra output column will be empty.  
+**WARNING**: If your source column has too many elements in it you'll lose any extra elements in it.  So if one of your MediaItems above looked like `10.89.893.22.393.1902`  The fifth and sixth values, `393 and 1902`, would be lost in the resulting query becuase ColdJack has no idea what to do with that extra data.
 
 # Exception Handling
 I'm not really sure what the best practice is for defining custom exceptions in CF but I sort of name-spaced mine using the "type" attribute.  There are a few exceptions that coldjack can throw and each has it's own custom type:
